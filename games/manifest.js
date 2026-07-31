@@ -43,6 +43,9 @@ export const GAMES = [
   { id: 'deduction', name: '犯人当て', cat: 'logic', best: 'time', ic: '🔎',
     desc: '手掛かりを突き合わせて容疑者からただ一人を特定する', kw: 'はんにんあて すいり ろじっく' },
 
+  { id: 'ludo', name: 'LUDO', cat: 'board', best: null, ic: '🎲',
+    desc: 'サイコロで駒を進めてゴールを目指す。CPU3人と対戦', kw: 'るーど すごろく さいころ' },
+
   { id: 'mahjong', name: '麻雀ソリティア', cat: 'board', best: 'time', ic: '🀄',
     desc: '同じ牌を2枚ずつ取り除く。必ず最後まで消せる配牌', kw: 'まーじゃん しゃんはい つみき' },
 

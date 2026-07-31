@@ -1,5 +1,5 @@
 // 自動生成。直接編集しないこと（node build-precache.mjs で再生成）
-self.PRECACHE_VERSION = 'v052cad85984a';
+self.PRECACHE_VERSION = 've56c7b41ba74';
 self.PRECACHE_FILES = [
   "./",
   "app.js",
@@ -7,6 +7,7 @@ self.PRECACHE_FILES = [
   "games/deduction.js",
   "games/klondike.js",
   "games/lightsout.js",
+  "games/ludo.js",
   "games/mahjong.js",
   "games/manifest.js",
   "games/memoflip.js",
