@@ -37,6 +37,9 @@ export const GAMES = [
   { id: 'minesweeper', name: 'マインスイーパ', cat: 'logic', best: 'time', ic: '💣',
     desc: '地雷を避けて安全なマスをすべて開く', kw: 'まいんすいーぱ じらい' },
 
+  { id: 'deduction', name: '犯人当て', cat: 'logic', best: 'time', ic: '🔎',
+    desc: '手掛かりを突き合わせて容疑者からただ一人を特定する', kw: 'はんにんあて すいり ろじっく' },
+
   { id: 'mahjong', name: '麻雀ソリティア', cat: 'board', best: 'time', ic: '🀄',
     desc: '同じ牌を2枚ずつ取り除く。必ず最後まで消せる配牌', kw: 'まーじゃん しゃんはい つみき' },
 
