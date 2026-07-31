@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#12121a">
+<title>オフラインゲーム集｜電波がなくても遊べる</title>
+<meta name="description" content="通信なしで遊べるミニゲーム集。電車の中でも地下でも、圏外でも遊べます。登録不要・無料。">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2312121a'/%3E%3Cg fill='%236c8cff'%3E%3Ccircle cx='11' cy='16' r='3'/%3E%3Crect x='18' y='9' width='6' height='6' rx='1.5'/%3E%3Crect x='18' y='17' width='6' height='6' rx='1.5'/%3E%3C/g%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f4f5f8; --panel:#fff; --ink:#14141b; --sub:#6a6a78; --line:#dcdde4;
+  --accent:#3d5afe; --accent-ink:#fff; --good:#0f9d58; --warn:#e8710a; --bad:#d93025;
+  --shadow:0 1px 2px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.05);
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#0e0e13; --panel:#191921; --ink:#eceef4; --sub:#9497a6; --line:#2b2c37;
+         --accent:#6c8cff; --accent-ink:#0e0e13; --shadow:0 1px 2px rgba(0,0,0,.4); }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;overscroll-behavior:none}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+
+/* ---- ヘッダー ---- */
+header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--panel);
+  border-bottom:1px solid var(--line);flex:none;min-height:52px}
+header h1{margin:0;font-size:16px;font-weight:700;letter-spacing:.01em;flex:1;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.iconbtn{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line);
+  border-radius:9px;background:transparent;color:var(--ink);cursor:pointer;flex:none;font-size:15px}
+.iconbtn:active{transform:scale(.94)}
+.iconbtn.on{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+
+/* ---- 一覧 ---- */
+#list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px calc(24px + var(--safe-b))}
+.search{width:100%;padding:10px 12px;border-radius:11px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);font:inherit;font-size:14px;margin-bottom:10px}
+.cats{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cat{flex:none;padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:var(--panel);
+  color:var(--sub);font-size:13px;cursor:pointer;white-space:nowrap}
+.cat.on{background:var(--accent);color:var(--accent-ink);border-color:transparent;font-weight:600}
+.sec{margin:6px 0 4px;font-size:12px;color:var(--sub);font-weight:600;letter-spacing:.04em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px;margin-bottom:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:11px 12px;
+  cursor:pointer;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:5px;min-height:96px;position:relative}
+.card:active{transform:scale(.975)}
+.card .ic{font-size:20px;line-height:1}
+.card .nm{font-size:14px;font-weight:700;line-height:1.25}
+.card .ds{font-size:11.5px;color:var(--sub);line-height:1.45;flex:1}
+.card .bs{font-size:10.5px;color:var(--accent);font-weight:700;font-variant-numeric:tabular-nums}
+.fav{position:absolute;top:7px;right:8px;font-size:13px;opacity:.35}
+.fav.on{opacity:1}
+.empty{text-align:center;color:var(--sub);font-size:13px;padding:40px 0}
+
+/* ---- ゲーム画面 ---- */
+#play{flex:1;display:none;flex-direction:column;overflow:hidden}
+body.playing #list{display:none}
+body.playing #play{display:flex}
+#stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:10px 12px calc(10px + var(--safe-b));overflow:auto;gap:10px}
+.hud{display:flex;gap:14px;align-items:center;font-size:12.5px;color:var(--sub);flex:none}
+.hud b{color:var(--ink);font-variant-numeric:tabular-nums;font-size:15px}
+.gbtns{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;flex:none}
+.gbtn{padding:8px 15px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
+  color:var(--ink);font:inherit;font-size:13px;cursor:pointer}
+.gbtn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent;font-weight:600}
+.gbtn:active{transform:translateY(1px)}
+
+/* ---- 結果オーバーレイ ---- */
+#over{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.55);z-index:50;padding:20px}
+#over.show{display:grid}
+.dlg{background:var(--panel);border-radius:16px;padding:22px 24px;text-align:center;max-width:300px;width:100%;
+  box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.dlg h3{margin:0 0 6px;font-size:19px}
+.dlg p{margin:0 0 16px;font-size:14px;color:var(--sub);line-height:1.7}
+.dlg .big{font-size:30px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;margin:2px 0 10px}
+.dlg .row{display:flex;gap:8px}
+.dlg .row .gbtn{flex:1;justify-content:center;text-align:center}
+
+/* ゲーム側で共通に使える部品 */
+.board{touch-action:none;user-select:none;max-width:100%;height:auto;display:block}
+.note{font-size:12px;color:var(--sub);text-align:center;line-height:1.6;max-width:340px}
+</style>
+</head>
+<body>
+
+<header>
+  <button class="iconbtn" id="backBtn" hidden aria-label="もどる">&#8592;</button>
+  <h1 id="title">オフラインゲーム集</h1>
+  <button class="iconbtn" id="soundBtn" aria-label="音">&#9834;</button>
+  <button class="iconbtn" id="restartBtn" hidden aria-label="やり直す">&#8635;</button>
+</header>
+
+<div id="list">
+  <input class="search" id="q" type="search" placeholder="ゲームを探す" autocomplete="off">
+  <div class="cats" id="cats"></div>
+  <div id="listBody"></div>
+  <!-- 広告枠。config.js を置いたときだけ中身が入る -->
+  <div id="adSlot" style="display:none;margin-top:14px"></div>
+</div>
+
+<div id="play">
+  <div id="stage"></div>
+</div>
+
+<div id="over"><div class="dlg">
+  <h3 id="ovTitle"></h3>
+  <div class="big" id="ovScore"></div>
+  <p id="ovText"></p>
+  <div class="row">
+    <button class="gbtn" id="ovBack">一覧へ</button>
+    <button class="gbtn primary" id="ovAgain">もう一度</button>
+  </div>
+</div></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
