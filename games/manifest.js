@@ -16,6 +16,9 @@ export const CATS = [
 ];
 
 export const GAMES = [
+  { id: 'daily', name: '今日の一問', cat: 'logic', best: 'time', ic: '📅',
+    desc: '1日1問だけ。全員が同じ問題に挑みます', kw: 'きょう でいりー まいにち' },
+
   { id: 'numplace', name: 'ナンプレ', cat: 'number', best: 'time', ic: '9️⃣',
     desc: 'タテヨコとブロックに同じ数字が入らないように埋める', kw: 'なんぷれ なんばーぷれーす' },
 

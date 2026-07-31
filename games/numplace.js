@@ -16,8 +16,10 @@ const LEVELS = [
 
 export default {
   mount(root, api) {
-    let N = api.load('N', 9);
-    let level = api.load('level', 3);
+    // 「今日の一問」から呼ばれたときは、盤面・難易度・種を固定する（全端末で同じ問題にするため）
+    const daily = api.daily || null;
+    let N = daily ? 9 : api.load('N', 9);
+    let level = daily ? 3 : api.load('level', 3);
     let puz = null;          // { N, puzzle, answer }
     let cur = null;          // 現在の盤面（プレイヤーの記入を含む）
     let memo = null;         // メモ（各マスに Set）
@@ -244,7 +246,7 @@ export default {
 
       // 生成は数十〜数百ms かかるので、先に「作っています」を描かせてから走らせる
       setTimeout(() => {
-        const p = generate(N, level);
+        const p = generate(N, level, 400, daily ? daily.seed : null);
         wait.remove();
         if (!p) { boardWrap.append(api.el('div', { class: 'note' }, '問題を作れませんでした')); return; }
         puz = p;
@@ -270,8 +272,10 @@ export default {
     const lvSel = api.el('select', { style: selStyle, onchange: (e) => { level = Number(e.target.value); newGame(); } });
     for (const l of LEVELS) lvSel.append(api.el('option', { value: l.v, ...(level === l.v ? { selected: '' } : {}) }, l.name));
 
-    api.add(api.el('div', { style: 'display:flex;gap:6px;justify-content:center;flex-wrap:wrap' }, sizeSel, lvSel));
-    api.buttons([{ label: '新しい問題', onClick: newGame, primary: true }]);
+    if (!daily) {
+      api.add(api.el('div', { style: 'display:flex;gap:6px;justify-content:center;flex-wrap:wrap' }, sizeSel, lvSel));
+      api.buttons([{ label: '新しい問題', onClick: newGame, primary: true }]);
+    }
     api.note('問題はその場で作り、解が1通りであることと、当てずっぽう不要で解けることを毎回確認しています');
 
     // キーボード

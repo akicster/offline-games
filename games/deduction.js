@@ -19,7 +19,9 @@ const LEVELS = [
 
 export default {
   mount(root, api) {
-    let li = api.load('level', 1);
+    // 「今日の一問」から呼ばれたときは、難易度と種を固定する（全端末で同じ問題にするため）
+    const daily = api.daily || null;
+    let li = daily ? 2 : api.load('level', 1);
     let c = null;              // 現在の事件
     let marks = {};            // 容疑者ごとのメモ ('' | 'x' | 'o')
     let startAt = 0, done = false, wrong = 0;
@@ -30,13 +32,15 @@ export default {
     const selStyle = 'padding:7px 10px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;font-size:13px';
     const lvSel = api.el('select', { style: selStyle, onchange: (e) => { li = Number(e.target.value); api.save('level', li); newCase(); } });
     LEVELS.forEach((l, i) => lvSel.append(api.el('option', { value: i, ...(li === i ? { selected: '' } : {}) }, l.name)));
-    api.add(lvSel);
+    if (!daily) api.add(lvSel);
 
-    api.buttons([
-      { label: 'メモを消す', onClick: () => { marks = {}; render(); } },
-      { label: '答えを見る', onClick: reveal },
-      { label: '新しい事件', onClick: newCase, primary: true },
-    ]);
+    api.buttons(daily
+      ? [{ label: 'メモを消す', onClick: () => { marks = {}; render(); } }]
+      : [
+        { label: 'メモを消す', onClick: () => { marks = {}; render(); } },
+        { label: '答えを見る', onClick: reveal },
+        { label: '新しい事件', onClick: newCase, primary: true },
+      ]);
     api.note('手掛かりをすべて突き合わせると、犯人は必ず一人に決まります。どの手掛かりも欠かせません');
 
     // ---- 描画 -------------------------------------------------------
@@ -143,7 +147,7 @@ export default {
 
     function newCase() {
       done = false; wrong = 0; marks = {};
-      let g = null, seed = (Math.floor(Math.random() * 2 ** 31)) >>> 0;
+      let g = null, seed = daily ? daily.seed : (Math.floor(Math.random() * 2 ** 31)) >>> 0;
       for (let t = 0; t < 30 && !g; t++) g = build((seed + t * 104729) >>> 0);
       if (!g) { wrap.textContent = ''; wrap.append(api.el('div', { class: 'note' }, '事件を作れませんでした')); return; }
       c = g; startAt = Date.now();
