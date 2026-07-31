@@ -261,10 +261,12 @@ function finish(won, score, text) {
   $('over').classList.add('show');
 }
 
-async function openGame(id) {
+async function openGame(id, fromHash = false) {
   const g = GAMES.find((x) => x.id === id);
   if (!g) return;
   sound('tap');
+  // URL に残すと、特定のゲームを直接共有できる。端末の戻る操作でも一覧に帰れる
+  if (!fromHash && location.hash !== '#g=' + id) location.hash = '#g=' + id;
 
   recent = [id, ...recent.filter((x) => x !== id)].slice(0, 12);
   LS.set('recent', recent);
@@ -293,7 +295,11 @@ async function openGame(id) {
   current = { g, api, cleanup };
 }
 
-function closeGame() {
+function closeGame(fromHash = false) {
+  if (!fromHash && location.hash) {
+    // hashchange 経由で closeGame が呼び直される
+    history.pushState(null, '', location.pathname + location.search);
+  }
   if (current) {
     try { current.cleanup && current.cleanup(); } catch { /* 後始末の失敗は無視 */ }
     try { current.api._swipeCleanup && current.api._swipeCleanup(); } catch { /* 同上 */ }
@@ -322,10 +328,11 @@ function restartGame() {
 // ---------------------------------------------------------------------------
 // 配線
 // ---------------------------------------------------------------------------
-$('backBtn').addEventListener('click', closeGame);
-$('restartBtn').addEventListener('click', restartGame);
-$('ovBack').addEventListener('click', closeGame);
-$('ovAgain').addEventListener('click', restartGame);
+// addEventListener はイベント引数を渡すため、必ず引数なしで呼び直す
+$('backBtn').addEventListener('click', () => closeGame());
+$('restartBtn').addEventListener('click', () => restartGame());
+$('ovBack').addEventListener('click', () => closeGame());
+$('ovAgain').addEventListener('click', () => restartGame());
 $('q').addEventListener('input', (e) => { query = e.target.value; renderList(); });
 
 $('soundBtn').addEventListener('click', () => {
@@ -341,11 +348,20 @@ window.addEventListener('keydown', (e) => {
   for (const h of current.api._keyHandlers) h(e);
 });
 
-// 戻る操作（Android の戻るボタン／ブラウザの戻る）で一覧へ
-window.addEventListener('popstate', () => { if (current) closeGame(); });
+// URL の #g=<id> と画面を同期させる（戻る操作や共有リンクに対応するため）
+function syncFromHash() {
+  const m = /^#g=([a-z0-9_-]+)$/i.exec(location.hash);
+  if (m) {
+    if (!current || current.g.id !== m[1]) openGame(m[1], true);
+  } else if (current) {
+    closeGame(true);
+  }
+}
+window.addEventListener('hashchange', syncFromHash);
 
 renderCats();
 renderList();
+syncFromHash();
 
 // 広告枠（config.js が無ければ何も起きない）
 import('./lib/ads.js').then(async (m) => {

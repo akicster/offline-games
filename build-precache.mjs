@@ -9,10 +9,13 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const SKIP = new Set(['serve.mjs', 'build-precache.mjs', 'precache.js', 'sw.js']);
 
+// 宣伝用の画像などはアプリ本体ではないのでキャッシュ対象から外す
+const SKIP_DIRS = new Set(['node_modules', 'promo', 'docs']);
+
 function walk(dir, base = '') {
   const out = [];
   for (const name of fs.readdirSync(dir)) {
-    if (name.startsWith('.') || name === 'node_modules') continue;
+    if (name.startsWith('.') || SKIP_DIRS.has(name)) continue;
     const full = path.join(dir, name);
     const rel = base ? `${base}/${name}` : name;
     if (fs.statSync(full).isDirectory()) out.push(...walk(full, rel));

@@ -21,7 +21,7 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
-html,body{margin:0;height:100%;overscroll-behavior:none}
+html,body{margin:0;height:100%;overscroll-behavior:none;overflow-x:hidden;max-width:100%}
 body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
   display:flex;flex-direction:column;height:100dvh;overflow:hidden}
 
@@ -63,6 +63,9 @@ body.playing #list{display:none}
 body.playing #play{display:flex}
 #stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:10px 12px calc(10px + var(--safe-b));overflow:auto;gap:10px}
+/* align-items:center の子は max-content 幅になり、折り返さず画面外へはみ出す。
+   これを防ぐため、直接の子は必ず親幅までに収める */
+#stage > *{max-width:100%}
 .hud{display:flex;gap:14px;align-items:center;font-size:12.5px;color:var(--sub);flex:none}
 .hud b{color:var(--ink);font-variant-numeric:tabular-nums;font-size:15px}
 .gbtns{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;flex:none}

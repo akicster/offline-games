@@ -187,7 +187,9 @@ export default {
     let startAt = 0, done = false, shuffles = 0;
     let history = [];    // 戻す用
     // 狭い画面では既定を小型配置にする（牌が小さすぎて読めなくなるため）
-    let layoutKey = api.load('layout', window.innerWidth < 430 ? 'compact' : 'turtle');
+    // 表示領域の実寸で判断する（window.innerWidth は端末やブラウザによって当てにならない）
+    const availWidth = () => Math.max(240, (root.clientWidth || window.innerWidth) - 24);
+    let layoutKey = api.load('layout', availWidth() < 420 ? 'compact' : 'turtle');
 
     const wrap = api.el('div', { class: 'mj-wrap' });
     api.add(wrap);
@@ -195,7 +197,7 @@ export default {
     // ---- 寸法 -------------------------------------------------------
     function layout() {
       const L = LAYOUTS[layoutKey];
-      const maxW = Math.min(window.innerWidth - 16, 560);
+      const maxW = Math.min(availWidth(), 560);
       const ux = maxW / (L.cols + 0.6);    // 横1マス
       const uy = ux * 1.30;                // 縦1マス（牌は縦長）
       const dz = ux * 0.13;                // 段の見た目のずれ

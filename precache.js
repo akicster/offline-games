@@ -1,5 +1,5 @@
 // 自動生成。直接編集しないこと（node build-precache.mjs で再生成）
-self.PRECACHE_VERSION = 'v84cac91940c3';
+self.PRECACHE_VERSION = 'v90826858d283';
 self.PRECACHE_FILES = [
   "./",
   "app.js",
@@ -21,5 +21,6 @@ self.PRECACHE_FILES = [
   "lib/ads.js",
   "lib/cards.js",
   "lib/sudoku.js",
-  "manifest.webmanifest"
+  "manifest.webmanifest",
+  "promo-shot.html"
 ];

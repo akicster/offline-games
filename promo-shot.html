@@ -1,0 +1,12 @@
+<!doctype html><meta charset="utf-8">
+<title>撮影用</title>
+<style>html,body{margin:0;background:#0e0e13}
+iframe{border:0;display:block;width:414px;height:896px}</style>
+<body>
+<script>
+  // headless は 500px 未満のビューポートを作れないため、iframe で実機幅を強制する
+  const g = new URLSearchParams(location.search).get('g') || '';
+  const f = document.createElement('iframe');
+  f.src = './' + (g ? '#g=' + g : '');
+  document.body.append(f);
+</script>

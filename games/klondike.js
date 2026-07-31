@@ -24,7 +24,8 @@ export default {
     // ---- 寸法 -------------------------------------------------------
     let CW = 44, CH = 62, GAP = 5, FAN_UP = 13, FAN_DOWN = 22;
     function measure() {
-      const w = Math.min(window.innerWidth - 20, 460);
+      // 表示領域の実寸で決める（window.innerWidth は当てにならない環境がある）
+      const w = Math.min(Math.max(240, (root.clientWidth || window.innerWidth) - 24), 460);
       GAP = Math.max(4, Math.round(w * 0.013));
       CW = Math.floor((w - GAP * 6) / 7);
       CH = Math.round(CW * 1.42);
