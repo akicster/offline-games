@@ -1,5 +1,5 @@
 // 自動生成。直接編集しないこと（node build-precache.mjs で再生成）
-self.PRECACHE_VERSION = 'v4ec1ce5b92bf';
+self.PRECACHE_VERSION = 'vf68dc17c7176';
 self.PRECACHE_FILES = [
   "./",
   "app.js",

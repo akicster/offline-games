@@ -406,6 +406,13 @@ let updateBarShown = false;
 function showUpdateBar(reg) {
   if (updateBarShown) return;
   updateBarShown = true;
+
+  // 遊んでいる最中でなければ、黙って新しい版に入れ替えてしまう。
+  // 「更新」を押させる方式だけだと、押さない人がいつまでも古い版のままになる。
+  if (!current && reg && reg.waiting) {
+    reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+    return;   // 切り替わると controllerchange が起きて自動で読み込み直される
+  }
   const bar = el('div', {
     style: 'position:fixed;left:12px;right:12px;bottom:calc(14px + var(--safe-b));z-index:60;'
       + 'background:var(--accent);color:var(--accent-ink);border-radius:12px;padding:11px 14px;'
