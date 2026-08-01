@@ -228,9 +228,9 @@ function makeApi(g) {
 
     // 終了 -------------------------------------------------------------
     /** クリア。score は数値（省略可）、text は補足 */
-    win(score, text) { finish(true, score, text); },
+    win(score, text) { finish(true, score, text, g); },
     /** 失敗・ゲームオーバー */
-    lose(score, text) { finish(false, score, text); },
+    lose(score, text) { finish(false, score, text, g); },
 
     _keyHandlers: keyHandlers,
   };
@@ -245,8 +245,11 @@ function updateBest(g, score) {
   return { best: cur, isNew: false };
 }
 
-function finish(won, score, text) {
+function finish(won, score, text, from) {
   if (!current) return;
+  // 前に遊んでいたゲームの後始末が遅れて届くことがある。
+  // そのまま出すと、別のゲームの上に前のゲームの結果が表示されてしまう。
+  if (from && from.id !== current.g.id) return;
   const g = current.g;
   const { best, isNew } = updateBest(g, score);
   sound(won ? 'win' : 'lose');
@@ -272,6 +275,7 @@ async function openGame(id, fromHash = false) {
   LS.set('recent', recent);
 
   document.body.classList.add('playing');
+  $('over').classList.remove('show');   // 前のゲームの結果が残っていたら消す
   $('title').textContent = g.name;
   $('backBtn').hidden = false;
   $('restartBtn').hidden = false;

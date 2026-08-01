@@ -43,6 +43,9 @@ export const GAMES = [
   { id: 'deduction', name: '犯人当て', cat: 'logic', best: 'time', ic: '🔎',
     desc: '手掛かりを突き合わせて容疑者からただ一人を特定する', kw: 'はんにんあて すいり ろじっく' },
 
+  { id: 'nonogram', name: 'お絵かきロジック', cat: 'logic', best: 'time', ic: '🖼️',
+    desc: '数字をたよりにマスを塗ると絵が現れる', kw: 'ののぐらむ おえかき ろじっく' },
+
   { id: 'ludo', name: 'LUDO', cat: 'board', best: null, ic: '🎲',
     desc: 'サイコロで駒を進めてゴールを目指す。CPU3人と対戦', kw: 'るーど すごろく さいころ' },
 
@@ -57,4 +60,13 @@ export const GAMES = [
 
   { id: 'spider', name: 'スパイダー', cat: 'board', best: 'time', ic: '🕷️',
     desc: '同じスートのKからAを8組そろえて取り除く', kw: 'すぱいだー そりてぃあ とらんぷ' },
+
+  { id: 'gomoku', name: '五目並べ', cat: 'board', best: null, ic: '⚫',
+    desc: '黒石を五つ並べてCPUに勝つ定番のボードゲーム', kw: 'ごもくならべ れんじゅ ぼーど' },
+
+  { id: 'maze', name: '迷路', cat: 'logic', best: 'time', ic: '🌀',
+    desc: '自動生成された迷路を進み、ゴールまでの道を見つける', kw: 'めいろ らびりんす みち' },
+
+  { id: 'hanoi', name: 'ハノイの塔', cat: 'logic', best: 'low', ic: '🗼',
+    desc: '小さい円盤を使いながら塔を右端の杭へ移す', kw: 'はのいのとう えんばん ぱずる' },
 ];
