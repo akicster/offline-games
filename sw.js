@@ -8,7 +8,7 @@
 // この行は build-precache.mjs が毎回書き換える。
 // ブラウザは sw.js のバイト列が変わったときだけ「新しい Service Worker」と判断するため、
 // 版番号は precache.js ではなく必ずこのファイル自身に埋め込む必要がある。
-const BUILD = 've56c7b41ba74';
+const BUILD = 'v8269cb62e40c';
 
 importScripts('precache.js');
 
@@ -21,8 +21,15 @@ self.addEventListener('install', (ev) => {
     await Promise.all(self.PRECACHE_FILES.map(async (f) => {
       try { await cache.add(new Request(f, { cache: 'reload' })); } catch { /* 取得できないものは飛ばす */ }
     }));
-    self.skipWaiting();
+    // ここで skipWaiting はしない。
+    // すぐ切り替えると、古いページが動いている最中に新しいファイルが返り、
+    // 版が混ざった状態になる。切り替えは利用者が「更新」を押した時だけ行う。
   })());
+});
+
+// 画面側から「更新」を押されたときだけ、新しい版に切り替える
+self.addEventListener('message', (ev) => {
+  if (ev.data && ev.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', (ev) => {

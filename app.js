@@ -369,6 +369,60 @@ import('./lib/ads.js').then(async (m) => {
 }).catch(() => { /* 広告が読めなくても本体は動く */ });
 
 // オフライン動作
+//
+// キャッシュ優先で動かしているため、更新した直後の訪問では古い版が表示される。
+// そのままだと新しいゲームを追加しても「次に開いたとき」まで気づかれない。
+// 新しい版が用意できたら、その場で知らせて読み込み直せるようにする。
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => { /* 未対応環境では素通り */ });
+  navigator.serviceWorker.register('sw.js').then((reg) => {
+    const check = (worker) => {
+      if (!worker) return;
+      worker.addEventListener('statechange', () => {
+        // すでに動いている版がある状態で新しい版が控えた = 更新がある
+        if (worker.state === 'installed' && navigator.serviceWorker.controller) showUpdateBar(reg);
+      });
+    };
+    if (reg.waiting && navigator.serviceWorker.controller) showUpdateBar(reg);
+    check(reg.installing);
+    reg.addEventListener('updatefound', () => check(reg.installing));
+    // 起動のたびに更新を確認する（オフラインなら黙って失敗する）
+    reg.update().catch(() => { /* 通信できないときは何もしない */ });
+  }).catch(() => { /* 未対応環境では素通り */ });
+
+  // 新しい版に切り替わったら読み込み直す（切り替えは「更新」を押した時だけ起きる）
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloading) return;
+    reloading = true;
+    location.reload();
+  });
+}
+
+let updateBarShown = false;
+function showUpdateBar(reg) {
+  if (updateBarShown) return;
+  updateBarShown = true;
+  const bar = el('div', {
+    style: 'position:fixed;left:12px;right:12px;bottom:calc(14px + var(--safe-b));z-index:60;'
+      + 'background:var(--accent);color:var(--accent-ink);border-radius:12px;padding:11px 14px;'
+      + 'display:flex;align-items:center;gap:10px;box-shadow:0 4px 18px rgba(0,0,0,.35);font-size:13.5px',
+  },
+    el('span', { style: 'flex:1' }, 'ゲームが追加されました'),
+    el('button', {
+      style: 'padding:6px 13px;border-radius:8px;border:0;background:rgba(255,255,255,.22);'
+        + 'color:inherit;font:inherit;font-size:13px;font-weight:700;cursor:pointer',
+      onclick: () => {
+        // 待機中の新しい版に切り替えを指示する。
+        // 切り替わると controllerchange が起きて自動で読み込み直される。
+        const w = reg && reg.waiting;
+        if (w) w.postMessage({ type: 'SKIP_WAITING' });
+        else location.reload();
+      },
+    }, '更新'),
+    el('button', {
+      style: 'padding:6px 9px;border-radius:8px;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;opacity:.8',
+      onclick: () => bar.remove(),
+    }, '×'),
+  );
+  document.body.append(bar);
 }

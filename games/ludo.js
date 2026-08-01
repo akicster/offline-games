@@ -72,8 +72,15 @@ export default {
     let busy = false;      // CPU思考中などの多重操作よけ
     let timers = [];
 
+    let waiters = [];      // アニメーション待ちの解決関数
+    let gen = 0;           // 盤面の世代。作り直したら進めて、進行中の処理を止める
+
     const later = (fn, ms) => { const t = setTimeout(fn, ms); timers.push(t); return t; };
-    const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
+    const clearTimers = () => {
+      timers.forEach(clearTimeout); timers = [];
+      // 待機中の Promise を放置すると、その先の処理が永久に止まり操作できなくなる
+      waiters.forEach((r) => r()); waiters = [];
+    };
 
     // ---- 画面 --------------------------------------------------------
     const board = api.el('div', { style: 'position:relative;width:min(94vw,420px);aspect-ratio:1' });
@@ -206,12 +213,28 @@ export default {
       return d + 'Z';
     }
 
-    function drawTokens() {
-      [...svg.querySelectorAll('.tk')].forEach((e) => e.remove());
-      const movable = legalMoves(st.turn, st.dice);
-      const canPick = st.phase === 'move' && kinds[st.turn] === 'human' && !st.winner;
+    // 駒は毎回作り直さず、同じ要素を動かす。
+    // そうしないと CSS の移動アニメーションが効かない。
+    const TOKENS = new Map();
 
-      // 同じマスに複数あるとき少しずらす
+    function buildTokens() {
+      TOKENS.clear();
+      for (const p of PLAYERS) {
+        for (let k = 0; k < 4; k++) {
+          const g = mk('g', { class: 'tk' });
+          g.style.transition = 'transform .13s ease-out';
+          g.append(mk('circle', { cx: 0, cy: 0.07, r: 0.36, fill: p.dark, opacity: 0.35 }));
+          g.append(mk('circle', { cx: 0, cy: 0, r: 0.33, fill: p.color, stroke: '#fff', 'stroke-width': 0.09 }));
+          const ring = mk('circle', { cx: 0, cy: 0, r: 0.47, fill: 'none', stroke: '#111', 'stroke-width': 0.08, opacity: 0 });
+          g.append(ring);
+          svg.append(g);
+          TOKENS.set(p.id + '-' + k, { g, ring, p, k });
+        }
+      }
+    }
+
+    /** 全駒の置き場所を計算する。同じマスに複数あるときは少しずらす */
+    function positions() {
       const at = new Map();
       for (const p of PLAYERS) {
         for (let k = 0; k < 4; k++) {
@@ -221,24 +244,55 @@ export default {
           const list = at.get(key) || []; list.push({ p, k, c, prog }); at.set(key, list);
         }
       }
-
+      const out = new Map();
       for (const [, list] of at) {
         list.forEach((t, idx) => {
           const n = list.length;
           const off = n > 1 ? (idx - (n - 1) / 2) * 0.22 : 0;
-          const cx = (t.prog === 0 ? t.c[0] : t.c[0] + 0.5) + off;
-          const cy = (t.prog === 0 ? t.c[1] : t.c[1] + 0.5) + (n > 2 ? off * 0.5 : 0);
-          const isMovable = canPick && movable.some((m) => m.k === t.k) && t.p.id === st.turn;
-          const g = mk('g', { class: 'tk', style: isMovable ? 'cursor:pointer' : '' });
-          g.append(mk('circle', { cx, cy, r: 0.36, fill: t.p.dark, opacity: 0.35 }));
-          g.append(mk('circle', { cx, cy: cy - 0.05, r: 0.33, fill: t.p.color, stroke: '#fff', 'stroke-width': 0.09 }));
-          if (isMovable) {
-            g.append(mk('circle', { cx, cy: cy - 0.05, r: 0.46, fill: 'none', stroke: '#111', 'stroke-width': 0.08, opacity: 0.8 }));
-            g.addEventListener('click', () => pick(t.k));
-          }
-          svg.append(g);
+          const x = (t.prog === 0 ? t.c[0] : t.c[0] + 0.5) + off;
+          const y = (t.prog === 0 ? t.c[1] : t.c[1] + 0.5) + (n > 2 ? off * 0.5 : 0);
+          out.set(t.p.id + '-' + t.k, [x, y]);
         });
       }
+      return out;
+    }
+
+    /** lift に駒のキーを渡すと、その駒だけ少し浮かせて描く（跳ねている途中の絵） */
+    function layout(lift = null) {
+      const pos = positions();
+      for (const [key, t] of TOKENS) {
+        const [x, y] = pos.get(key);
+        t.g.setAttribute('transform', `translate(${x} ${y + (key === lift ? -0.34 : 0)})`);
+      }
+    }
+
+    /** 動かせる駒に印を付け、押せるようにする */
+    function interact() {
+      const movable = legalMoves(st.turn, st.dice);
+      const canPick = st.phase === 'move' && kinds[st.turn] === 'human' && !st.winner && !busy;
+      for (const [, t] of TOKENS) {
+        const on = canPick && t.p.id === st.turn && movable.some((m) => m.k === t.k);
+        t.ring.setAttribute('opacity', on ? 0.85 : 0);
+        t.g.style.cursor = on ? 'pointer' : '';
+        t.g.onclick = on ? () => pick(t.k) : null;
+      }
+    }
+
+    function drawTokens() { layout(); interact(); }
+
+    const wait = (ms) => new Promise((res) => {
+      let done = false;
+      const fin = () => { if (!done) { done = true; res(); } };
+      waiters.push(fin);
+      later(fin, ms);
+    });
+
+    /** 1マス分、トンと跳ねて進む */
+    async function hop(key) {
+      layout(key);      // 次のマスへ移りながら浮く
+      await wait(62);
+      layout(null);     // 着地
+      await wait(62);
     }
 
     // ---- ルール ------------------------------------------------------
@@ -257,27 +311,42 @@ export default {
       return out;
     }
 
-    /** 動かす。戻り値: { captured, goaled } */
-    function apply(pi, k, d) {
-      const from = st.pos[pi][k];
-      const to = from === 0 ? 1 : from + d;
-      st.pos[pi][k] = to;
-
+    /** 着地したマスに相手の駒がいれば、待機所へ戻す */
+    function resolveCapture(pi, to) {
+      if (to > TRACK_END) return false;
+      const cell = (PLAYERS[pi].start + to - 1) % 52;
+      if (SAFE.has(cell)) return false;
       let captured = false;
-      if (to <= TRACK_END) {
-        const cell = (PLAYERS[pi].start + to - 1) % 52;
-        if (!SAFE.has(cell)) {
-          for (const q of PLAYERS) {
-            if (q.id === pi) continue;
-            for (let j = 0; j < 4; j++) {
-              const op = st.pos[q.id][j];
-              if (op === 0 || op > TRACK_END) continue;
-              if ((q.start + op - 1) % 52 === cell) { st.pos[q.id][j] = 0; captured = true; }
-            }
-          }
+      for (const q of PLAYERS) {
+        if (q.id === pi) continue;
+        for (let j = 0; j < 4; j++) {
+          const op = st.pos[q.id][j];
+          if (op === 0 || op > TRACK_END) continue;
+          if ((q.start + op - 1) % 52 === cell) { st.pos[q.id][j] = 0; captured = true; }
         }
       }
-      return { captured, goaled: to === GOAL };
+      return captured;
+    }
+
+    /** 1マスずつ跳ねながら進める */
+    async function walk(pi, k, d) {
+      const key = pi + '-' + k;
+      const myGen = gen;
+      const from = st.pos[pi][k];
+      if (from === 0) {
+        st.pos[pi][k] = 1;                 // 待機所から入口へは一足で出る
+        api.sound('move');
+        await hop(key);
+      } else {
+        for (let s = 1; s <= d; s++) {
+          // 途中で盤が作り直されたら、新しい盤面を書き換えないよう即座に止める
+          if (myGen !== gen) return st.pos[pi][k];
+          st.pos[pi][k] = from + s;
+          api.sound('tap');
+          await hop(key);
+        }
+      }
+      return st.pos[pi][k];
     }
 
     // ---- 進行 --------------------------------------------------------
@@ -317,30 +386,44 @@ export default {
       if (moves.length === 0) {
         setStatus(`${PLAYERS[st.turn].name}　${d} — 動かせる駒がありません`);
         api.sound('bad');
-        later(() => { nextTurn(d === 6); }, 750);
+        later(() => { nextTurn(d === 6); }, 600);
         busy = false;
         return;
       }
 
       st.phase = 'move';
+      // interact() は busy を見て押せるかどうかを決めるので、先に解除しておく
+      busy = false;
       drawTokens();
       if (kinds[st.turn] === 'human') {
         setStatus(moves.length === 1 ? `${PLAYERS[st.turn].name}　${d} — 駒を押してください` : `${PLAYERS[st.turn].name}　${d} — どの駒を動かしますか`);
-        busy = false;
         if (moves.length === 1) later(() => pick(moves[0].k), 350);   // 選択肢が1つなら自動で進める
       } else {
         setStatus(`${PLAYERS[st.turn].name}（CPU）　${d}`);
-        later(() => { const m = chooseCpu(st.turn, d, moves); pick(m.k); }, 550);
+        later(() => { const m = chooseCpu(st.turn, d, moves); pick(m.k); }, 380);
       }
     }
 
-    function pick(k) {
-      if (st.phase !== 'move' || st.winner) return;
+    async function pick(k) {
+      if (busy || st.phase !== 'move' || st.winner) return;
       const d = st.dice;
       if (!canMove(st.turn, k, d)) { api.sound('bad'); return; }
       busy = true;
-      const r = apply(st.turn, k, d);
-      api.sound(r.captured ? 'win' : r.goaled ? 'good' : 'move');
+      st.phase = 'walking';
+      interact();                                   // 移動中は他の駒を押せなくする
+
+      const myGen = gen;
+      const mover = st.turn;
+      const to = await walk(mover, k, d);
+      // 移動中に「はじめから」等で盤が作り直されたら、ここで打ち切る
+      if (myGen !== gen) { busy = false; return; }
+      if (st.winner) { busy = false; return; }
+
+      const captured = resolveCapture(mover, to);
+      const goaled = to === GOAL;
+      if (captured) { api.sound('win'); layout(); await wait(220); }
+      else if (goaled) api.sound('good');
+      const r = { captured, goaled };
       drawTokens();
 
       if (st.pos[st.turn].every((v) => v === GOAL)) {
@@ -362,8 +445,8 @@ export default {
       }
 
       // 6・駒を戻した・上がった のいずれかならもう一度振れる
-      later(() => nextTurn(d === 6 || r.captured || r.goaled), 450);
       busy = false;
+      later(() => nextTurn(d === 6 || r.captured || r.goaled), 240);
     }
 
     function nextTurn(again) {
@@ -495,6 +578,7 @@ export default {
     }
 
     function newGame() {
+      gen++;              // 進行中のアニメーションを無効にする
       clearTimers();
       st = { pos: [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], turn: 0, dice: 0, phase: 'roll', sixes: 0, winner: null };
       // 人間の席から始める
@@ -502,7 +586,7 @@ export default {
       st.turn = first < 0 ? 0 : first;
       busy = false;
       diceBtn.textContent = '🎲';
-      drawBoard(); drawTokens();
+      drawBoard(); buildTokens(); drawTokens();
       setStatus(kinds[st.turn] === 'human' ? `${PLAYERS[st.turn].name}の番　サイコロを振ってください` : `${PLAYERS[st.turn].name}（CPU）の番`);
       if (kinds[st.turn] !== 'human') later(roll, 600);
       save();
@@ -516,7 +600,7 @@ export default {
       kinds = saved.kinds || kinds;
       st = { pos: saved.pos, turn: saved.turn || 0, dice: 0, phase: 'roll', sixes: 0, winner: null };
       renderSetup();
-      drawBoard(); drawTokens();
+      drawBoard(); buildTokens(); drawTokens();
       setStatus(kinds[st.turn] === 'human' ? `${PLAYERS[st.turn].name}の番　サイコロを振ってください` : `${PLAYERS[st.turn].name}（CPU）の番`);
       if (kinds[st.turn] !== 'human') later(roll, 600);
     } else {
