@@ -84,7 +84,4 @@ export const GAMES = [
 
   { id: 'hanoi', name: 'ハノイの塔', cat: 'logic', best: 'low', ic: '🗼',
     desc: '小さい円盤を使いながら塔を右端の杭へ移す', kw: 'はのいのとう えんばん ぱずる' },
-  { id: 'wordsearch', name: 'ことばさがし', cat: 'word', best: 'time', ic: '🔤', desc: '盤面に隠れたカタカナの言葉を見つける', kw: 'ことばさがし もじ たんご かたかな' },
-  { id: 'maketen', name: '10をつくる', cat: 'number', best: 'time', ic: '🔟', desc: '4つの数字と四則演算を使って10を作る', kw: 'じゅうをつくる けいさん しそくえんざん' },
-  { id: 'chain', name: 'れんさパズル', cat: 'action', best: 'high', ic: '🟣', desc: '同じ色を4つつなげて消し連鎖を狙う', kw: 'れんさ おちもの ぶろっく いろ' },
 ];

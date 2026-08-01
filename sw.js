@@ -8,7 +8,7 @@
 // この行は build-precache.mjs が毎回書き換える。
 // ブラウザは sw.js のバイト列が変わったときだけ「新しい Service Worker」と判断するため、
 // 版番号は precache.js ではなく必ずこのファイル自身に埋め込む必要がある。
-const BUILD = 'vb01c34d6a04c';
+const BUILD = 'v4f925ff8f64a';
 
 importScripts('precache.js');
 
