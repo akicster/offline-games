@@ -43,6 +43,9 @@ export const GAMES = [
   { id: 'deduction', name: '犯人当て', cat: 'logic', best: 'time', ic: '🔎',
     desc: '手掛かりを突き合わせて容疑者からただ一人を特定する', kw: 'はんにんあて すいり ろじっく' },
 
+  { id: 'towerdefense', name: 'タワーディフェンス', cat: 'action', best: 'high', ic: '🏰',
+    desc: '道を進む敵を、建てた塔で食い止める', kw: 'たわーでぃふぇんす とりで まもる' },
+
   { id: 'nonogram', name: 'お絵かきロジック', cat: 'logic', best: 'time', ic: '🖼️',
     desc: '数字をたよりにマスを塗ると絵が現れる', kw: 'ののぐらむ おえかき ろじっく' },
 
@@ -63,6 +66,15 @@ export const GAMES = [
 
   { id: 'gomoku', name: '五目並べ', cat: 'board', best: null, ic: '⚫',
     desc: '黒石を五つ並べてCPUに勝つ定番のボードゲーム', kw: 'ごもくならべ れんじゅ ぼーど' },
+
+  { id: 'freecell', name: 'フリーセル', cat: 'board', best: 'time', ic: '🃏',
+    desc: '空きセルを使い、すべてのカードを4つの組札へ重ねる', kw: 'ふりーせる そりてぃあ とらんぷ' },
+
+  { id: 'reversi', name: 'リバーシ', cat: 'board', best: null, ic: '⚪',
+    desc: '相手の石を挟んで返し、CPUより多くの石を残す', kw: 'りばーし おせろ ぼーど' },
+
+  { id: 'breakout', name: 'ブロック崩し', cat: 'action', best: 'high', ic: '🧱',
+    desc: 'バーでボールを打ち返し、すべてのブロックを壊す', kw: 'ぶろっくくずし あくしょん ぼーる' },
 
   { id: 'maze', name: '迷路', cat: 'logic', best: 'time', ic: '🌀',
     desc: '自動生成された迷路を進み、ゴールまでの道を見つける', kw: 'めいろ らびりんす みち' },
