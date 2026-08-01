@@ -1,5 +1,5 @@
 // 自動生成。直接編集しないこと（node build-precache.mjs で再生成）
-self.PRECACHE_VERSION = 'vea51464372f8';
+self.PRECACHE_VERSION = 'vb01c34d6a04c';
 self.PRECACHE_FILES = [
   "./",
   "app.js",
@@ -23,6 +23,7 @@ self.PRECACHE_FILES = [
   "games/reversi.js",
   "games/slide15.js",
   "games/snake.js",
+  "games/sokoban.js",
   "games/spider.js",
   "games/stackdrop.js",
   "games/towerdefense.js",
@@ -34,6 +35,7 @@ self.PRECACHE_FILES = [
   "lib/daily.js",
   "lib/deduction.js",
   "lib/nonogram.js",
+  "lib/sokoban.js",
   "lib/sudoku.js",
   "manifest.webmanifest",
   "promo-shot.html"
