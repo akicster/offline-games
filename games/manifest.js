@@ -46,6 +46,9 @@ export const GAMES = [
   { id: 'towerdefense', name: 'タワーディフェンス', cat: 'action', best: 'high', ic: '🏰',
     desc: '道を進む敵を、建てた塔で食い止める', kw: 'たわーでぃふぇんす とりで まもる' },
 
+  { id: 'kakuro', name: 'カックロ', cat: 'number', best: 'time', ic: '➕',
+    desc: 'タテヨコの合計を手掛かりに1〜9を入れる数字クロスワード', kw: 'かっくろ かずくろす けいさん' },
+
   { id: 'sokoban', name: '倉庫番', cat: 'logic', best: 'low', ic: '📦',
     desc: '荷物を押して目的地に収める。全10面すべて解けることを確認済み', kw: 'そうこばん そこばん にもつ' },
 
@@ -87,4 +90,7 @@ export const GAMES = [
   { id: 'wordsearch', name: 'ことばさがし', cat: 'word', best: 'time', ic: '🔤', desc: '盤面に隠れたカタカナの言葉を見つける', kw: 'ことばさがし もじ たんご かたかな' },
   { id: 'maketen', name: '10をつくる', cat: 'number', best: 'time', ic: '🔟', desc: '4つの数字と四則演算を使って10を作る', kw: 'じゅうをつくる けいさん しそくえんざん' },
   { id: 'chain', name: 'れんさパズル', cat: 'action', best: 'high', ic: '🟣', desc: '同じ色を4つつなげて消し連鎖を狙う', kw: 'れんさ おちもの ぶろっく いろ' },
+  { id: 'pyramid', name: 'ピラミッド', cat: 'board', best: 'time', ic: '🔺', desc: '露出した札で13を作り、7段のピラミッドをすべて消す', kw: 'ぴらみっど そりてぃあ とらんぷ 13' },
+  { id: 'simon', name: 'おとおぼえ', cat: 'memory', best: 'high', ic: '🎵', desc: '光る4色の順番を覚えて、同じ順に押し返す', kw: 'おとおぼえ さいもん きおく いろ' },
+  { id: 'numbertouch', name: 'かずタッチ', cat: 'number', best: 'time', ic: '🔢', desc: '散らばった数字を1から順に押し、速さを競う', kw: 'かずたっち すうじ じゅんばん しゃっふる' },
 ];

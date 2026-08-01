@@ -8,7 +8,7 @@
 // この行は build-precache.mjs が毎回書き換える。
 // ブラウザは sw.js のバイト列が変わったときだけ「新しい Service Worker」と判断するため、
 // 版番号は precache.js ではなく必ずこのファイル自身に埋め込む必要がある。
-const BUILD = 'v98266206e179';
+const BUILD = 'v4ec1ce5b92bf';
 
 importScripts('precache.js');
 
@@ -39,6 +39,13 @@ self.addEventListener('activate', (ev) => {
   })());
 });
 
+// 画面の骨組みと一覧は、通信できるときは新しい方を取りに行く。
+// ここをキャッシュ優先にすると、更新してもその訪問では古い版が表示され、
+// 追加したゲームが「次に開くまで出てこない」状態になる。
+// （通信できないときは今までどおりキャッシュから返すので、オフライン動作は変わらない）
+const FRESH_FIRST = ['/', '/index.html', '/app.js', '/games/manifest.js'];
+const isFreshFirst = (url) => FRESH_FIRST.some((p) => url.pathname.endsWith(p) || url.pathname === p);
+
 self.addEventListener('fetch', (ev) => {
   const req = ev.request;
   if (req.method !== 'GET') return;
@@ -47,6 +54,21 @@ self.addEventListener('fetch', (ev) => {
 
   ev.respondWith((async () => {
     const cache = await caches.open(CACHE);
+
+    if (isFreshFirst(url) || req.mode === 'navigate') {
+      try {
+        // 3秒で応答がなければキャッシュに切り替える（遅い回線で待たせないため）
+        const fresh = await Promise.race([
+          fetch(req, { cache: 'no-store' }),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 3000)),
+        ]);
+        if (fresh && fresh.ok) { cache.put(req, fresh.clone()); return fresh; }
+      } catch { /* 通信できないのでキャッシュへ */ }
+      const cached = await cache.match(req, { ignoreSearch: true })
+        || await cache.match('./', { ignoreSearch: true });
+      if (cached) return cached;
+    }
+
     const hit = await cache.match(req, { ignoreSearch: true });
     if (hit) {
       // 裏で静かに更新しておく（オンラインのときだけ）

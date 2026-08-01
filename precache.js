@@ -1,5 +1,5 @@
 // 自動生成。直接編集しないこと（node build-precache.mjs で再生成）
-self.PRECACHE_VERSION = 'v98266206e179';
+self.PRECACHE_VERSION = 'v4ec1ce5b92bf';
 self.PRECACHE_FILES = [
   "./",
   "app.js",
@@ -10,6 +10,7 @@ self.PRECACHE_FILES = [
   "games/freecell.js",
   "games/gomoku.js",
   "games/hanoi.js",
+  "games/kakuro.js",
   "games/klondike.js",
   "games/lightsout.js",
   "games/ludo.js",
@@ -21,8 +22,11 @@ self.PRECACHE_FILES = [
   "games/merge2048.js",
   "games/minesweeper.js",
   "games/nonogram.js",
+  "games/numbertouch.js",
   "games/numplace.js",
+  "games/pyramid.js",
   "games/reversi.js",
+  "games/simon.js",
   "games/slide15.js",
   "games/snake.js",
   "games/sokoban.js",
@@ -37,6 +41,8 @@ self.PRECACHE_FILES = [
   "lib/cards.js",
   "lib/daily.js",
   "lib/deduction.js",
+  "lib/kakuro-data.js",
+  "lib/kakuro.js",
   "lib/nonogram.js",
   "lib/sokoban.js",
   "lib/sudoku.js",
