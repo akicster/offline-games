@@ -1,9 +1,10 @@
 // 自動生成。直接編集しないこと（node build-precache.mjs で再生成）
-self.PRECACHE_VERSION = 'v4f925ff8f64a';
+self.PRECACHE_VERSION = 'v98266206e179';
 self.PRECACHE_FILES = [
   "./",
   "app.js",
   "games/breakout.js",
+  "games/chain.js",
   "games/daily.js",
   "games/deduction.js",
   "games/freecell.js",
@@ -13,6 +14,7 @@ self.PRECACHE_FILES = [
   "games/lightsout.js",
   "games/ludo.js",
   "games/mahjong.js",
+  "games/maketen.js",
   "games/manifest.js",
   "games/maze.js",
   "games/memoflip.js",
@@ -27,6 +29,7 @@ self.PRECACHE_FILES = [
   "games/spider.js",
   "games/stackdrop.js",
   "games/towerdefense.js",
+  "games/wordsearch.js",
   "icon-192.svg",
   "icon-512.svg",
   "index.html",
